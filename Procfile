@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -Dhttp.port=$PORT -jar dziennik-api/target/dziennik-api-*-fat.jar
+web: java $JAVA_OPTS -Dhttp.port=$PORT -jar target/dziennik-api-fat.jar
