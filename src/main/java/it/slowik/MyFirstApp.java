@@ -8,6 +8,7 @@ public class MyFirstApp extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> fut) {
+
         vertx.deployVerticle(new SimpleConsumer());
         vertx
                 .createHttpServer()
