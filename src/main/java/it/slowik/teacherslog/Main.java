@@ -8,21 +8,24 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import it.slowik.teacherslog.service.GroupSaver;
 import it.slowik.teacherslog.service.GroupsResolver;
+import it.slowik.teacherslog.service.MongoClientResolver;
+
+import static it.slowik.teacherslog.service.MongoClientResolver.resolve;
 
 public class Main extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> fut) {
 
-        vertx.deployVerticle(new GroupsResolver(), new DeploymentOptions().setWorker(true));
-        vertx.deployVerticle(new GroupSaver(), new DeploymentOptions().setWorker(true));
+        vertx.deployVerticle(new GroupsResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
+        vertx.deployVerticle(new GroupSaver(resolve(vertx)), new DeploymentOptions().setWorker(true));
 
 
         Router router = Router.router(vertx);
         router.get("/").handler(req -> req.response().end("ohai"));
         router.get("/groups/").handler(req -> vertx.eventBus().send(GroupsResolver.LIST_GROUPS, "", reply -> {
             if (reply.succeeded()) {
-                req.response().setStatusCode(200).putHeader("content-type","application/json").end(reply.result().body().toString());
+                req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
             }
         }));
         router.post("/groups*").handler(BodyHandler.create());

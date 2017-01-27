@@ -12,7 +12,7 @@ import io.vertx.ext.mongo.MongoClient;
 public class MongoClientResolver {
     public static MongoClient resolve(Vertx vertx) {
         JsonObject config = new JsonObject();
-        config.put("connection_string", System.getProperty("MONGO_URL", "mongodb://localhost:27018"));
+        config.put("connection_string", System.getProperty("MONGODB_URI", "mongodb://localhost:27018"));
         return MongoClient.createShared(vertx, config);
     }
 }

@@ -14,9 +14,14 @@ public class GroupSaver extends AbstractVerticle {
 
     public static String CREATE_GROUP = "groups.create";
 
+    private MongoClient client;
+
+    public GroupSaver(MongoClient client) {
+        this.client = client;
+    }
+
     @Override
     public void start() throws Exception {
-        MongoClient client = MongoClientResolver.resolve(vertx);
         EventBus eventBus = vertx.eventBus();
         eventBus.consumer(CREATE_GROUP, message -> {
             JsonObject group = (JsonObject) message.body();
