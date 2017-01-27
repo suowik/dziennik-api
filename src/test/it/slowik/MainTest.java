@@ -15,14 +15,14 @@ import org.junit.runner.RunWith;
  * on 23/01/17.
  */
 @RunWith(VertxUnitRunner.class)
-public class MyFirstAppTest {
+public class MainTest {
 
     private Vertx vertx;
 
     @Before
     public void setUp(TestContext context) {
         vertx = Vertx.vertx();
-        vertx.deployVerticle(MyFirstApp.class.getName(),
+        vertx.deployVerticle(Main.class.getName(),
                 context.asyncAssertSuccess());
     }
 
