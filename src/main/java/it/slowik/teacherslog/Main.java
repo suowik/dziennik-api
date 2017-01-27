@@ -16,7 +16,7 @@ public class Main extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> fut) {
-
+        System.out.println(System.getProperty("MONGODB_URI"));
         vertx.deployVerticle(new GroupsResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
         vertx.deployVerticle(new GroupSaver(resolve(vertx)), new DeploymentOptions().setWorker(true));
 
