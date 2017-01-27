@@ -11,12 +11,14 @@ public class MyFirstApp extends AbstractVerticle {
         vertx.deployVerticle(new SimpleConsumer());
         vertx
                 .createHttpServer()
-                .requestHandler(r -> {
+                .requestHandler(req -> {
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.put("a", "a");
                     vertx.eventBus().send("ab", jsonObject, reply -> {
                         if (reply.succeeded()) {
-                            r.response().end(reply.result().body().toString());
+                            req.response().end(reply.result().body().toString());
+                        } else {
+                            req.response().end("Hello");
                         }
                     });
                 })
