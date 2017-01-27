@@ -20,12 +20,6 @@ public class MyFirstApp extends AbstractVerticle {
                         }
                     });
                 })
-                .listen(8080, result -> {
-                    if (result.succeeded()) {
-                        fut.complete();
-                    } else {
-                        fut.fail(result.cause());
-                    }
-                });
+                .listen(Integer.getInteger("http.port", 8080), System.getProperty("http.address", "0.0.0.0"));
     }
 }
