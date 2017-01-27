@@ -22,6 +22,6 @@ public class MyFirstApp extends AbstractVerticle {
                         }
                     });
                 })
-                .listen(Integer.getInteger("PORT"), System.getProperty("http.address", "0.0.0.0"));
+                .listen(Integer.getInteger("PORT", 8080), System.getProperty("http.address", "0.0.0.0"));
     }
 }
