@@ -3,9 +3,12 @@ package it.slowik.teacherslog;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.MultiMap;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import it.slowik.teacherslog.service.GroupSaver;
 import it.slowik.teacherslog.service.GroupsResolver;
 import it.slowik.teacherslog.service.MongoClientResolver;
@@ -21,6 +24,11 @@ public class Main extends AbstractVerticle {
 
 
         Router router = Router.router(vertx);
+        router.route().handler(CorsHandler.create("*")
+                .allowedMethod(HttpMethod.GET)
+                .allowedMethod(HttpMethod.POST)
+                .allowedMethod(HttpMethod.OPTIONS)
+                .allowedHeader("Content-Type"));
         router.get("/").handler(req -> req.response().end("ohai"));
         router.get("/groups/").handler(req -> vertx.eventBus().send(GroupsResolver.LIST_GROUPS, "", reply -> {
             if (reply.succeeded()) {
