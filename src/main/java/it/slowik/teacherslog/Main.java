@@ -9,6 +9,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
+import it.slowik.teacherslog.service.GroupResolver;
 import it.slowik.teacherslog.service.GroupSaver;
 import it.slowik.teacherslog.service.GroupsResolver;
 import it.slowik.teacherslog.service.MongoClientResolver;
@@ -21,6 +22,7 @@ public class Main extends AbstractVerticle {
     public void start(Future<Void> fut) {
         vertx.deployVerticle(new GroupsResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
         vertx.deployVerticle(new GroupSaver(resolve(vertx)), new DeploymentOptions().setWorker(true));
+        vertx.deployVerticle(new GroupResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
 
 
         Router router = Router.router(vertx);
@@ -31,6 +33,11 @@ public class Main extends AbstractVerticle {
                 .allowedHeader("Content-Type"));
         router.get("/").handler(req -> req.response().end("ohai"));
         router.get("/groups/").handler(req -> vertx.eventBus().send(GroupsResolver.LIST_GROUPS, "", reply -> {
+            if (reply.succeeded()) {
+                req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
+            }
+        }));
+        router.get("/groups/:name").handler(req -> vertx.eventBus().send(GroupResolver.FETCH_GROUP, req.request().getParam("name"), reply -> {
             if (reply.succeeded()) {
                 req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
             }
