@@ -18,6 +18,7 @@ public class GroupsResolver extends AbstractVerticle {
     public static final String LIST_GROUPS = "groups.list";
     public static final FindOptions FIND_OPTIONS = new FindOptions(
             new JsonObject()
+                    .put("sort", new JsonObject().put("name", true))
                     .put("fields",
                             new JsonObject()
                                     .put("name", true)
