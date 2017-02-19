@@ -3,9 +3,7 @@ package it.slowik.teacherslog.service;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 
 /**
@@ -13,13 +11,13 @@ import io.vertx.ext.mongo.MongoClient;
  * pawelslowik
  * on 27/01/17.
  */
-public class GroupResolver extends AbstractVerticle {
+public class GroupByPasswordResolver extends AbstractVerticle {
 
-    public static final String FETCH_GROUP = "groups.fetchById";
+    public static final String FETCH_GROUP = "groups.fetchByPassword";
 
     private MongoClient client;
 
-    public GroupResolver(MongoClient client) {
+    public GroupByPasswordResolver(MongoClient client) {
         this.client = client;
     }
 
@@ -27,7 +25,7 @@ public class GroupResolver extends AbstractVerticle {
     public void start(Future<Void> startFuture) throws Exception {
         EventBus eventBus = vertx.eventBus();
 
-        eventBus.consumer(FETCH_GROUP, handler -> client.findOne("groups", new JsonObject().put("_id", handler.body()), new JsonObject(), queryRes -> {
+        eventBus.consumer(FETCH_GROUP, handler -> client.findOne("groups", new JsonObject().put("password", handler.body()), new JsonObject(), queryRes -> {
             if (queryRes.succeeded()) {
                 handler.reply(queryRes.result());
             } else {

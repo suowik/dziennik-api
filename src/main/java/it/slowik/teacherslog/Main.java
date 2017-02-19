@@ -1,18 +1,14 @@
 package it.slowik.teacherslog;
 
-import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
-import io.vertx.core.MultiMap;
+import com.google.common.base.Strings;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
-import it.slowik.teacherslog.service.GroupResolver;
-import it.slowik.teacherslog.service.GroupSaver;
-import it.slowik.teacherslog.service.GroupsResolver;
-import it.slowik.teacherslog.service.MongoClientResolver;
+import it.slowik.teacherslog.service.*;
 
 import static it.slowik.teacherslog.service.MongoClientResolver.resolve;
 
@@ -21,6 +17,7 @@ public class Main extends AbstractVerticle {
     @Override
     public void start(Future<Void> fut) {
         vertx.deployVerticle(new GroupsResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
+        vertx.deployVerticle(new GroupByPasswordResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
         vertx.deployVerticle(new GroupSaver(resolve(vertx)), new DeploymentOptions().setWorker(true));
         vertx.deployVerticle(new GroupResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
 
@@ -31,13 +28,18 @@ public class Main extends AbstractVerticle {
                 .allowedMethod(HttpMethod.POST)
                 .allowedMethod(HttpMethod.OPTIONS)
                 .allowedHeader("Content-Type"));
-        router.get("/").handler(req -> req.response().end("ohai"));
+        //router.route().handler(new AuthHandler());
         router.get("/groups/").handler(req -> vertx.eventBus().send(GroupsResolver.LIST_GROUPS, "", reply -> {
             if (reply.succeeded()) {
                 req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
             }
         }));
         router.get("/groups/:name").handler(req -> vertx.eventBus().send(GroupResolver.FETCH_GROUP, req.request().getParam("name"), reply -> {
+            if (reply.succeeded()) {
+                req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
+            }
+        }));
+        router.get("/protected/:name").handler(req -> vertx.eventBus().send(GroupByPasswordResolver.FETCH_GROUP, req.request().getParam("name"), reply -> {
             if (reply.succeeded()) {
                 req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
             }
@@ -57,5 +59,18 @@ public class Main extends AbstractVerticle {
         vertx.createHttpServer()
                 .requestHandler(router::accept)
                 .listen(Integer.getInteger("http.port", 8080), System.getProperty("http.address", "0.0.0.0"));
+    }
+}
+
+class AuthHandler implements Handler<RoutingContext> {
+
+    @Override
+    public void handle(RoutingContext routingContext) {
+        String auth = routingContext.request().getHeader("Authorization");
+        if (Strings.isNullOrEmpty(auth)) {
+            routingContext.response().setStatusCode(401).end();
+        } else {
+            routingContext.next();
+        }
     }
 }
