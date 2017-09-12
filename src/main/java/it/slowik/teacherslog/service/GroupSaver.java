@@ -25,7 +25,7 @@ public class GroupSaver extends AbstractVerticle {
         EventBus eventBus = vertx.eventBus();
         eventBus.consumer(CREATE_GROUP, message -> {
             JsonObject group = (JsonObject) message.body();
-            group.put("_id", group.getString("name"));
+            group.put("_id", group.getString("_id"));
             client.save("groups", group, res -> {
                 if (res.succeeded()) {
                     message.reply(new JsonObject().put("id", res.result()));
