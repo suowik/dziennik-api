@@ -21,6 +21,7 @@ public class GroupsResolver extends AbstractVerticle {
                     .put("fields",
                             new JsonObject()
                                     .put("name", true)
+                                    .put("archive", true)
                                     .put("description", true)
                                     .put("dateOfActivities", true)));
 
