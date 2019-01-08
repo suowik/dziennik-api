@@ -14,6 +14,10 @@ import static it.slowik.teacherslog.service.MongoClientResolver.resolve;
 
 public class Main extends AbstractVerticle {
 
+    public static void main(String[] args) {
+        Vertx.vertx().deployVerticle(new Main());
+    }
+
     @Override
     public void start(Future<Void> fut) {
         vertx.deployVerticle(new GroupsResolver(resolve(vertx)), new DeploymentOptions().setWorker(true));
