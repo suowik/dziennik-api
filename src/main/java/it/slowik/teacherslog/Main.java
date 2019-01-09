@@ -75,19 +75,16 @@ class AuthHandler implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        String auth = Optional.ofNullable(routingContext.request().getHeader("Authorization"))
-                .flatMap((raw) -> {
-                    if (raw.matches("Basic .*")) {
-                        return Optional.of(raw.split(" ")[1]);
-                    } else {
-                        return Optional.empty();
-                    }
-                }).orElse("");
-        if (Strings.isNullOrEmpty(auth) || !auth.equalsIgnoreCase(EnvSupport.getEnv("AUTH", "verysafesecret"))) {
+        Optional<String> auth = Optional.ofNullable(routingContext.request().getHeader("Authorization"))
+                .filter(raw -> !Strings.isNullOrEmpty(raw))
+                .filter(raw -> raw.matches("Basic .*"))
+                .map(raw -> raw.split(" ")[1])
+                .filter(raw -> raw.equalsIgnoreCase(EnvSupport.getEnv("AUTH", "verysafesecret")));
 
-            routingContext.response().setStatusCode(401).end();
-        } else {
+        if (auth.isPresent()) {
             routingContext.next();
+        } else {
+            routingContext.response().setStatusCode(401).end();
         }
     }
 }
