@@ -34,7 +34,7 @@ public class Main extends AbstractVerticle {
                 .allowedMethod(HttpMethod.OPTIONS)
                 .allowedHeaders(Sets.newHashSet("Content-type", "Authorization")));
         //router.route().handler(new AuthHandler());
-        router.get("/groups*").handler(new AuthHandler());
+        //router.get("/groups*").handler(new AuthHandler());
         router.get("/groups/").handler(req -> vertx.eventBus().send(GroupsResolver.LIST_GROUPS, "", reply -> {
             if (reply.succeeded()) {
                 req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
