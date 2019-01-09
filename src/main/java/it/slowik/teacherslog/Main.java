@@ -12,6 +12,8 @@ import io.vertx.ext.web.handler.CorsHandler;
 import it.slowik.teacherslog.service.*;
 import it.slowik.teacherslog.support.EnvSupport;
 
+import java.util.Optional;
+
 import static it.slowik.teacherslog.service.MongoClientResolver.resolve;
 
 public class Main extends AbstractVerticle {
@@ -73,8 +75,16 @@ class AuthHandler implements Handler<RoutingContext> {
 
     @Override
     public void handle(RoutingContext routingContext) {
-        String auth = routingContext.request().getHeader("Authorization");
-        if (Strings.isNullOrEmpty(auth) || !auth.equalsIgnoreCase(EnvSupport.getEnv("AUTH","verysafesecret"))) {
+        String auth = Optional.ofNullable(routingContext.request().getHeader("Authorization"))
+                .flatMap((raw) -> {
+                    if (raw.matches("Basic .*")) {
+                        return Optional.of(raw.split(" ")[1]);
+                    } else {
+                        return Optional.empty();
+                    }
+                }).orElse("");
+        if (Strings.isNullOrEmpty(auth) || !auth.equalsIgnoreCase(EnvSupport.getEnv("AUTH", "verysafesecret"))) {
+
             routingContext.response().setStatusCode(401).end();
         } else {
             routingContext.next();
