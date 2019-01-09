@@ -10,6 +10,7 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import it.slowik.teacherslog.service.*;
+import it.slowik.teacherslog.support.EnvSupport;
 
 import static it.slowik.teacherslog.service.MongoClientResolver.resolve;
 
@@ -34,7 +35,7 @@ public class Main extends AbstractVerticle {
                 .allowedMethod(HttpMethod.OPTIONS)
                 .allowedHeaders(Sets.newHashSet("Content-type", "Authorization")));
         //router.route().handler(new AuthHandler());
-        //router.get("/groups*").handler(new AuthHandler());
+        router.post("/groups*").handler(new AuthHandler());
         router.get("/groups/").handler(req -> vertx.eventBus().send(GroupsResolver.LIST_GROUPS, "", reply -> {
             if (reply.succeeded()) {
                 req.response().setStatusCode(200).putHeader("content-type", "application/json").end(reply.result().body().toString());
@@ -73,7 +74,7 @@ class AuthHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
         String auth = routingContext.request().getHeader("Authorization");
-        if (Strings.isNullOrEmpty(auth)) {
+        if (Strings.isNullOrEmpty(auth) || !auth.equalsIgnoreCase(EnvSupport.getEnv("AUTH","verysafesecret"))) {
             routingContext.response().setStatusCode(401).end();
         } else {
             routingContext.next();
